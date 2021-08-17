@@ -1,7 +1,4 @@
-CREATE TABLE IF NOT EXISTS gasto (
-    id              INTEGER      PRIMARY KEY ASC AUTOINCREMENT,
-    descricao       STRING (500),
-    data            DATE         NOT NULL,
+CREATE TABLE IF NOT EXISTS gasto (id INTEGER PRIMARY KEY ASC AUTOINCREMENT,descricao STRING (500),data DATE NOT NULL,
     tipo            INTEGER      NOT NULL,
     valor           DOUBLE       NOT NULL,
     formapagamento  STRING (200),
