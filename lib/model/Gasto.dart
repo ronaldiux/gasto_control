@@ -1,7 +1,7 @@
 class Gasto {
   int id;
   String descricao;
-  String data;
+  DateTime data;
   int tipo;
   double valor;
   String formapagamento;

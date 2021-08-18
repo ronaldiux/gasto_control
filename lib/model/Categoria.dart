@@ -1,7 +1,7 @@
-class Categorias {
+class Categoria {
   int id;
   String descricao;
   String tipo;
 
-  Categorias({required this.id, required this.descricao, required this.tipo});
+  Categoria({required this.id, required this.descricao, required this.tipo});
 }

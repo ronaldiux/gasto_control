@@ -1,3 +1,7 @@
+import 'dart:math';
+import 'package:gasto_control/model/Categoria.dart';
+import 'package:gasto_control/model/Gasto.dart';
+import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
@@ -11,16 +15,157 @@ class SqliteFunc {
     return await rootBundle.loadString('assets/insert_categorias_basic.txt');
   }
 
+  Future<String> limpagasto() async {
+    final Database db = await getDatabase();
+    db.delete('gasto');
+
+    return '';
+  }
+
+  random(min, max) {
+    var rn = new Random();
+    return min + rn.nextInt(max - min);
+  }
+
+  Future<List<Categoria>> getCategorias() async {
+    final Database db = await getDatabase();
+    List<Categoria> categorias = [];
+
+    List<Map<String, dynamic>> maps = [];
+    maps = await db.query('categorias');
+    print('CATEGORIAS=${maps.length}');
+    maps.forEach((element) {
+      var def = new Categoria(
+          id: element['id'],
+          descricao: element['descricao'],
+          tipo: element['tipo']);
+
+      categorias.add(def);
+    });
+
+    return categorias;
+  }
+
+  Future<String> insRdmGasto() async {
+    final Database db = await getDatabase();
+    String ms = '${random(100, 999)}';
+    int tipo = random(0, 2);
+
+    print(tipo);
+    print('data=${DateFormat('yyyy-MM-dd').format(DateTime.now())}');
+    try {
+      db.insert('gasto', {
+        'descricao': 'teste $ms',
+        'data': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        'tipo': (tipo == 0) ? 0 : 1,
+        'valor': random(1, 100),
+        'formapagamento': 'A Vista',
+        'categoria': '1',
+        'pago': 'false',
+        'id_parcelamento': 0
+      });
+      print('ok');
+      return 'ok';
+    } catch (e) {
+      print(e);
+      return '$e';
+    }
+  }
+
+  Future<Gasto> getgastoid(int id) async {
+    final Database db = await getDatabase();
+
+    late Gasto gst;
+
+    List<Map<String, dynamic>> maps = [];
+    maps = await db.query('gasto', where: 'id = ?', whereArgs: [id]);
+
+    maps.forEach((element) {
+      bool pago = false;
+      if (element['pago'] == 'false') {
+        pago = false;
+      } else {
+        pago = true;
+      }
+
+      gst = new Gasto(
+          categoria: '${element['categoria']}',
+          data: DateTime.parse(element['data']),
+          descricao: element['descricao'],
+          formapagamento: element['formapagamento'],
+          id: element['id'],
+          pago: pago,
+          tipo: element['tipo'],
+          valor: element['valor']);
+
+      print(gst.descricao);
+    });
+    return gst;
+  }
+
+  Future<List<Gasto>> getGastos(
+      {int mesinicio = 0, int mesfim = 0, int ano = 0}) async {
+    final Database db = await getDatabase();
+    List<Gasto> gastos = [];
+    List<Map<String, dynamic>> maps = [];
+
+    var now = new DateTime.now();
+
+// Find the last day of the month.
+    var beginningNextMonth = (now.month < 12)
+        ? new DateTime(now.year, now.month + 1, 1)
+        : new DateTime(now.year + 1, 1, 1);
+    var lastDay = beginningNextMonth.subtract(new Duration(days: 1)).day;
+
+    if (mesinicio == 0) {
+      maps = await db.query('gasto');
+    } else {
+      var dateinit = new DateTime(ano, mesinicio, 1);
+      var datefim = new DateTime(ano, mesfim, lastDay);
+
+      print('where = $dateinit||$datefim');
+      maps = await db.query('gasto',
+          where: 'data BETWEEN ? AND ?',
+          whereArgs: [
+            DateFormat('yyyy-MM-dd').format(dateinit),
+            DateFormat('yyyy-MM-dd').format(datefim)
+          ],
+          orderBy: 'data,valor');
+    }
+
+    maps.forEach((element) {
+      bool pago = false;
+      if (element['pago'] == 'false') {
+        pago = false;
+      } else {
+        pago = true;
+      }
+      var dr = new Gasto(
+          categoria: '${element['categoria']}',
+          data: DateTime.parse(element['data']),
+          descricao: element['descricao'],
+          formapagamento: element['formapagamento'],
+          id: element['id'],
+          pago: pago,
+          tipo: element['tipo'],
+          valor: element['valor']);
+
+      gastos.add(dr);
+    });
+    return gastos;
+  }
+
   Future<Database> getDatabase() async {
     List<String> sqlrun = [];
     sqlrun.add("CREATE TABLE IF NOT EXISTS gasto (" +
-        "    id INTEGER PRIMARY KEY ASC AUTOINCREMENT," +
-        "  descricao STRING (500),data DATE NOT NULL," +
-        "  tipo            INTEGER      NOT NULL," +
-        "  valor           DOUBLE       NOT NULL," +
+        "  id INTEGER PRIMARY KEY ASC AUTOINCREMENT," +
+        "  descricao STRING (500)," +
+        "  data DATE NOT NULL," +
+        "  tipo            INTEGER NOT NULL," +
+        "  valor           DOUBLE NOT NULL," +
         "  formapagamento  STRING (200)," +
         "  categoria       STRING (200)," +
-        "  pago            BOOLEAN      NOT NULL," +
+        "  pago            BOOLEAN NOT NULL," +
         "  id_parcelamento INTEGER );");
 
     sqlrun.add("CREATE TABLE IF NOT EXISTS parcelamentos (" +
@@ -76,7 +221,7 @@ class SqliteFunc {
     );
   }
 
-  void initCategorias() async {
+  Future initCategorias() async {
     final Database db = await getDatabase();
     final List<Map<String, dynamic>> result = await db.query('categorias');
 

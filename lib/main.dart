@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gasto_control/pages/homepage.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() {
-  runApp(MyApp());
+  initializeDateFormatting('pt_BR', null).then((_) => runApp(MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -28,6 +30,37 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+
+    init();
+  }
+
+  void init() async {
+    print('INICIANDO');
+    await Future.delayed(Duration(seconds: 2));
+    print('INICIANDO-PUSH');
+    Navigator.push(
+        context,
+        new PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            var begin = Offset(-2.0, 0.0);
+            var end = Offset.zero;
+            var curve = Curves.ease;
+
+            var tween =
+                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
