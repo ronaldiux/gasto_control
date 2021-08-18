@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomFormField extends StatelessWidget {
@@ -15,6 +16,7 @@ class CustomFormField extends StatelessWidget {
   final Color decorationColor;
   final Color fontColor;
   final Color lblcolor;
+  final List<TextInputFormatter>? inputFormatters;
 
   final double fontsize;
   final double radius;
@@ -39,7 +41,8 @@ class CustomFormField extends StatelessWidget {
       this.radius = 30,
       this.widgetprefix,
       this.lblcolor = const Color.fromRGBO(120, 119, 122, 1),
-      this.prefixtext = ''})
+      this.prefixtext = '',
+      this.inputFormatters})
       : super(key: key);
 
 //
@@ -65,6 +68,7 @@ class CustomFormField extends StatelessWidget {
           focusNode: fcs,
           controller: ctrl,
           obscureText: obscuretxt,
+          inputFormatters: inputFormatters,
           decoration: InputDecoration(
             //prefix: widgetprefix == null ? null : widgetprefix,
             icon: icondecoration == null ? null : icondecoration,

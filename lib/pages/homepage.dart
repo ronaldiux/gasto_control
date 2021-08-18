@@ -162,8 +162,8 @@ class _HomePageState extends State<HomePage> {
                   child: Text('Limpar Gastos'),
                 ),
                 TextButton(
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    var res = await Navigator.push(
                         context,
                         new PageRouteBuilder(
                           pageBuilder:
@@ -185,6 +185,10 @@ class _HomePageState extends State<HomePage> {
                           },
                         ));
 
+                    if ('$res' == 'ok') {
+                      await setmes(mestela);
+                    }
+
                     //SqliteFunc().insRdmGasto();
                   },
                   child: Text('Inserir Gastos'),
@@ -201,15 +205,31 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        //backgroundColor: const Color(0xff03dac6),
-        //foregroundColor: Colors.black,
-        // mini: true,
-        onPressed: () {
-          //SqliteFunc().limpagasto();
+        onPressed: () async {
+          var res = await Navigator.push(
+              context,
+              new PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    CadGasto(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  var begin = Offset(-2.0, 0.0);
+                  var end = Offset.zero;
+                  var curve = Curves.ease;
 
-          // SqliteFunc().insGasto();
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
 
-          init();
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
+              ));
+
+          if ('$res' == 'ok') {
+            await setmes(mestela);
+          }
         },
         child: Icon(Icons.add),
       ),
@@ -295,7 +315,7 @@ class _HomePageState extends State<HomePage> {
                                 child: InkWell(
                                   onTap: () async {
                                     print('gasto id = ${gastos[index].id}');
-                                    await Navigator.push(
+                                    var res = await Navigator.push(
                                         context,
                                         new PageRouteBuilder(
                                           pageBuilder: (context, animation,
@@ -322,7 +342,9 @@ class _HomePageState extends State<HomePage> {
                                             );
                                           },
                                         ));
-                                    setmes(mestela);
+                                    if ('$res' == 'ok') {
+                                      await setmes(mestela);
+                                    }
                                   },
                                   splashColor: Color.fromRGBO(63, 62, 63, 1),
                                   highlightColor: Color.fromRGBO(63, 62, 63, 1),
@@ -340,7 +362,8 @@ class _HomePageState extends State<HomePage> {
                                         Text((gastos[index].tipo == 0)
                                             ? 'Entrada'
                                             : 'Saida'),
-                                        Text('R\$ ${gastos[index].valor}'),
+                                        Text(
+                                            'R\$ ${gastos[index].valor.toString().replaceAll('.', ',')}'),
                                       ],
                                     ),
                                   ),
@@ -358,9 +381,12 @@ class _HomePageState extends State<HomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Entradas : R\$$entrada'),
-                            Text('Saidas     : R\$$saida'),
-                            Text('Balanço   : R\$$balanco'),
+                            Text(
+                                'Entradas : R\$ ${entrada.toString().replaceAll('.', ',')}'),
+                            Text(
+                                'Saidas     : R\$ ${saida.toString().replaceAll('.', ',')}'),
+                            Text(
+                                'Balanço   : R\$ ${balanco.toString().replaceAll('.', ',')}'),
                           ],
                         ),
                       ),

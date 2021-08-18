@@ -46,6 +46,58 @@ class SqliteFunc {
     return categorias;
   }
 
+  Future<String> insGasto(Gasto gst, {int idparcelamento = 0}) async {
+    final Database db = await getDatabase();
+
+    print('data=${DateFormat('yyyy-MM-dd').format(DateTime.now())}');
+
+    try {
+      db.insert('gasto', {
+        'descricao': gst.descricao,
+        'data': DateFormat('yyyy-MM-dd').format(gst.data),
+        'tipo': gst.tipo,
+        'valor': gst.valor,
+        'formapagamento': gst.formapagamento,
+        'categoria': gst.categoria,
+        'pago': gst.pago,
+        'id_parcelamento': idparcelamento
+      });
+      print('ok');
+      return 'ok';
+    } catch (e) {
+      print(e);
+      return '$e';
+    }
+  }
+
+  Future<String> updateGasto(Gasto gst, {int idparcelamento = 0}) async {
+    final Database db = await getDatabase();
+
+    print('data=${DateFormat('yyyy-MM-dd').format(DateTime.now())}');
+
+    try {
+      db.update(
+          'gasto',
+          {
+            'descricao': gst.descricao,
+            'data': DateFormat('yyyy-MM-dd').format(gst.data),
+            'tipo': gst.tipo,
+            'valor': gst.valor,
+            'formapagamento': gst.formapagamento,
+            'categoria': gst.categoria,
+            'pago': gst.pago,
+            'id_parcelamento': idparcelamento
+          },
+          where: 'id = ?',
+          whereArgs: [gst.id]);
+      print('ok');
+      return 'ok';
+    } catch (e) {
+      print(e);
+      return '$e';
+    }
+  }
+
   Future<String> insRdmGasto() async {
     final Database db = await getDatabase();
     String ms = '${random(100, 999)}';
