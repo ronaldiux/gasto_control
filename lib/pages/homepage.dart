@@ -310,8 +310,8 @@ class _HomePageState extends State<HomePage> {
                               int a = index % 2;
                               return Card(
                                 color: (a == 0)
-                                    ? Color.fromRGBO(93, 92, 93, 1)
-                                    : Color.fromRGBO(103, 102, 103, 1),
+                                    ? Color.fromRGBO(203, 202, 203, 1)
+                                    : Color.fromRGBO(153, 152, 153, 1),
                                 child: InkWell(
                                   onTap: () async {
                                     print('gasto id = ${gastos[index].id}');
@@ -346,24 +346,52 @@ class _HomePageState extends State<HomePage> {
                                       await setmes(mestela);
                                     }
                                   },
-                                  splashColor: Color.fromRGBO(63, 62, 63, 1),
-                                  highlightColor: Color.fromRGBO(63, 62, 63, 1),
+                                  //splashColor: Color.fromRGBO(63, 62, 63, 1),
+                                  highlightColor:
+                                      Color.fromRGBO(223, 223, 223, 1),
                                   child: Container(
-                                    height: 90,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                    height: 100,
+                                    child: Row(
                                       children: [
-                                        Text(gastos[index].descricao),
-                                        Text(
-                                            '${DateFormat('dd/MM/yyyy').format(gastos[index].data)}'),
-                                        Text(gastos[index].formapagamento),
-                                        Text((gastos[index].tipo == 0)
-                                            ? 'Entrada'
-                                            : 'Saida'),
-                                        Text(
-                                            'R\$ ${gastos[index].valor.toString().replaceAll('.', ',')}'),
+                                        Expanded(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(gastos[index].descricao),
+                                              Text(
+                                                  '${DateFormat('dd/MM/yyyy').format(gastos[index].data)}'),
+                                              Text(
+                                                  gastos[index].formapagamento),
+                                              Text((gastos[index].tipo == 0)
+                                                  ? 'Entrada'
+                                                  : 'Saida'),
+                                              Text(
+                                                  'R\$ ${gastos[index].valor.toString().replaceAll('.', ',')}'),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 50,
+                                          //color: Colors.red,
+                                          child: Column(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () async {},
+                                                icon: Icon(
+                                                  Icons.edit,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                onPressed: () {},
+                                                icon: Icon(Icons.delete,
+                                                    size: 20),
+                                              ),
+                                            ],
+                                          ),
+                                        )
                                       ],
                                     ),
                                   ),

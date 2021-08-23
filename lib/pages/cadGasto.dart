@@ -327,13 +327,17 @@ class _CadGastoState extends State<CadGasto> {
                             child: TextButton(
                               onPressed: () async {
                                 String res = '';
+                                String strvalor = _valor.text;
+                                strvalor = strvalor.replaceAll('.', '');
+                                strvalor = strvalor.replaceAll(',', '.');
+                                double valor = double.parse(strvalor);
 
-                                double valor = double.parse(
-                                    _valor.text.replaceAll(',', '.'));
                                 print(valor);
+
                                 setState(() {
                                   loadad = true;
                                 });
+
                                 if (widget.idGasto == 0) {
                                   Gasto gst = Gasto(
                                       id: 0,
@@ -347,9 +351,6 @@ class _CadGastoState extends State<CadGasto> {
 
                                   res = await SqliteFunc().insGasto(gst);
                                 } else {
-                                  double valor = double.parse(
-                                      _valor.text.replaceAll(',', '.'));
-
                                   Gasto gst = Gasto(
                                       id: widget.idGasto,
                                       descricao: _descricao.text,
