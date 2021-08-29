@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomFormField extends StatelessWidget {
+  final bool autoFocus;
   final bool enabled;
   final FocusNode fcs;
   final TextEditingController ctrl;
@@ -42,7 +43,8 @@ class CustomFormField extends StatelessWidget {
       this.widgetprefix,
       this.lblcolor = const Color.fromRGBO(120, 119, 122, 1),
       this.prefixtext = '',
-      this.inputFormatters})
+      this.inputFormatters,
+      this.autoFocus = false})
       : super(key: key);
 
 //
@@ -60,7 +62,8 @@ class CustomFormField extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(left: 10),
         child: TextFormField(
-          textCapitalization: TextCapitalization.words,
+          autofocus: autoFocus,
+          textCapitalization: TextCapitalization.sentences,
           enabled: enabled,
           enableSuggestions: true,
           keyboardType: keyboardType == null ? null : keyboardType,

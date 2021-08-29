@@ -6,6 +6,7 @@ import 'package:gasto_control/utils/sqliteFunction.dart';
 import 'package:gasto_control/widgets/textInput.dart';
 import 'package:intl/intl.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
+import 'package:gasto_control/model/Colors.dart';
 
 class CadGasto extends StatefulWidget {
   final int idGasto;
@@ -70,16 +71,23 @@ class _CadGastoState extends State<CadGasto> {
   }
 
   init() async {
+    setState(() {
+      isLoading = true;
+    });
+
     categorias = await SqliteFunc().getCategorias();
+
     categorias.forEach((element) {
       strCategorias.add(element.descricao);
     });
-    print(categorias.length);
-    print(strCategorias);
+
+    print('CATEGORIAS=${categorias.length}');
+    //print(strCategorias);
 
     if (widget.idGasto != 0) {
       Gasto gst = await SqliteFunc().getgastoid(widget.idGasto);
 
+      categoriaGasto = gst.categoria;
       _descricao.text = gst.descricao;
       _valor.text = gst.valor.toString().replaceAll('.', ',');
       datagasto = gst.data;
@@ -91,8 +99,8 @@ class _CadGastoState extends State<CadGasto> {
     } else {
       _descricao.text = '';
       _valor.text = '0,00';
+      categoriaGasto = strCategorias[0];
     }
-    categoriaGasto = strCategorias[0];
 
     setState(() {
       isLoading = false;
@@ -109,7 +117,8 @@ class _CadGastoState extends State<CadGasto> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text((widget.idGasto == 0) ? 'Cadastro' : 'Edição'),
+        backgroundColor: CustomColors.tema1(),
+        title: Text((widget.idGasto == 0) ? 'Cadastrar' : 'Editar'),
       ),
       body: SingleChildScrollView(
         child: isLoading
@@ -118,13 +127,18 @@ class _CadGastoState extends State<CadGasto> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    CircularProgressIndicator(),
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        CustomColors.tema1(),
+                      ),
+                    ),
                     SizedBox(
                       height: 10,
                     ),
                     Text(
                       'Carregando',
-                      style: TextStyle(fontSize: 18, color: Colors.black),
+                      style:
+                          TextStyle(fontSize: 18, color: CustomColors.tema1()),
                     )
                   ],
                 ),
@@ -139,13 +153,15 @@ class _CadGastoState extends State<CadGasto> {
                         Padding(
                           padding: EdgeInsets.all(5),
                           child: CustomFormField(
+                            autoFocus: true,
                             ctrl: _descricao,
                             hinttxt: 'Descrição',
-                            lblcolor: Colors.white,
+                            lblcolor: CustomColors.tema1(),
                             enabled: true,
                             fcs: _descNode,
+                            fontColor: CustomColors.tema1(),
                             keyboardType: TextInputType.text,
-                            decorationColor: Colors.grey.shade400,
+                            decorationColor: Colors.white,
                             txtInputAction: TextInputAction.next,
                             radius: 3,
                             fieldSubmitted: (_) {
@@ -163,15 +179,16 @@ class _CadGastoState extends State<CadGasto> {
                                 symbol: '',
                               )
                             ],
-                            lblcolor: Colors.white,
+                            lblcolor: CustomColors.tema1(),
                             prefixtext: 'R\$ ',
                             ctrl: _valor,
                             hinttxt: 'Valor',
                             enabled: true,
                             fcs: _vlrNode,
                             radius: 3,
+                            fontColor: CustomColors.tema1(),
                             keyboardType: TextInputType.number,
-                            decorationColor: Colors.grey.shade400,
+                            decorationColor: Colors.white,
                             txtInputAction: TextInputAction.next,
                           ),
                         ),
@@ -179,7 +196,7 @@ class _CadGastoState extends State<CadGasto> {
                           padding: const EdgeInsets.all(5.0),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade400,
+                              color: Colors.white,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(3)),
                             ),
@@ -187,17 +204,21 @@ class _CadGastoState extends State<CadGasto> {
                               padding: const EdgeInsets.only(left: 10),
                               child: DateTimeFormField(
                                 initialValue: datagasto,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   border: InputBorder.none,
                                   suffixIcon: Icon(Icons.event_note),
                                   labelText: 'Data',
-                                  labelStyle: TextStyle(color: Colors.white),
+                                  labelStyle: TextStyle(
+                                    color: CustomColors.tema1(),
+                                  ),
                                 ),
                                 //firstDate: datagasto,
                                 dateFormat: DateFormat('dd/MM/yyyy'),
                                 mode: DateTimeFieldPickerMode.date,
                                 autovalidateMode: AutovalidateMode.always,
-                                dateTextStyle: TextStyle(color: Colors.white),
+                                dateTextStyle: TextStyle(
+                                  color: CustomColors.tema1(),
+                                ),
                                 validator: (e) {},
                                 onDateSelected: (DateTime value) {
                                   datagasto = value;
@@ -211,7 +232,7 @@ class _CadGastoState extends State<CadGasto> {
                           padding: EdgeInsets.all(5.0),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade400,
+                              color: Colors.white,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(3)),
                             ),
@@ -221,7 +242,7 @@ class _CadGastoState extends State<CadGasto> {
                               padding: const EdgeInsets.only(left: 10),
                               child: DropdownButton<String>(
                                 style: TextStyle(
-                                    color: Colors.black, fontSize: 16),
+                                    color: CustomColors.tema1(), fontSize: 16),
                                 dropdownColor: Colors.white,
                                 value: tipogasto,
                                 onChanged: (String? newValue) {
@@ -246,7 +267,7 @@ class _CadGastoState extends State<CadGasto> {
                           padding: EdgeInsets.all(5.0),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade400,
+                              color: Colors.white,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(3)),
                             ),
@@ -256,7 +277,7 @@ class _CadGastoState extends State<CadGasto> {
                               padding: const EdgeInsets.only(left: 10),
                               child: DropdownButton<String>(
                                 style: TextStyle(
-                                    color: Colors.black, fontSize: 16),
+                                    color: CustomColors.tema1(), fontSize: 16),
                                 dropdownColor: Colors.white,
                                 value: formapagamento,
                                 onChanged: (String? newValue) {
@@ -282,7 +303,7 @@ class _CadGastoState extends State<CadGasto> {
                           padding: EdgeInsets.all(5.0),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade400,
+                              color: Colors.white,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(3)),
                             ),
@@ -292,7 +313,7 @@ class _CadGastoState extends State<CadGasto> {
                                 isExpanded: true,
                                 value: categoriaGasto,
                                 style: TextStyle(
-                                    color: Colors.black, fontSize: 16),
+                                    color: CustomColors.tema1(), fontSize: 16),
                                 dropdownColor: Colors.white,
                                 onChanged: (newValue) {
                                   setState(() {
@@ -322,8 +343,8 @@ class _CadGastoState extends State<CadGasto> {
                             width: double.maxFinite,
                             height: 45,
                             decoration: BoxDecoration(
-                                color: Color.fromRGBO(28, 140, 85, 1),
-                                borderRadius: BorderRadius.circular(15)),
+                                color: CustomColors.tema2(),
+                                borderRadius: BorderRadius.circular(5)),
                             child: TextButton(
                               onPressed: () async {
                                 String res = '';
@@ -380,13 +401,57 @@ class _CadGastoState extends State<CadGasto> {
                                 shape: MaterialStateProperty.all<
                                     RoundedRectangleBorder>(
                                   RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15.0),
+                                    borderRadius: BorderRadius.circular(5.0),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        )
+                        ),
+                        (widget.idGasto == 0)
+                            ? SizedBox()
+                            : Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: Container(
+                                  width: double.maxFinite,
+                                  height: 45,
+                                  decoration: BoxDecoration(
+                                      color: CustomColors.vermelho(),
+                                      borderRadius: BorderRadius.circular(5)),
+                                  child: TextButton(
+                                    onPressed: () async {
+                                      setState(() {
+                                        loadad = true;
+                                      });
+
+                                      var res = await SqliteFunc()
+                                          .delegasto(widget.idGasto);
+
+                                      await Future.delayed(
+                                          Duration(milliseconds: 500));
+                                      setState(() {
+                                        loadad = false;
+                                      });
+                                      if (res == 'ok') {
+                                        Navigator.pop(context, 'ok');
+                                      }
+                                    },
+                                    child: Text(
+                                      'Apagar',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    style: ButtonStyle(
+                                      shape: MaterialStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
                       ],
                     ),
                     loadad

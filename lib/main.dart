@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gasto_control/model/Colors.dart';
 import 'package:gasto_control/pages/homepage.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -7,13 +8,16 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  MaterialColor colorCustom = MaterialColor(
+      int.parse(CustomColors.hexTema1, radix: 16), CustomColors().color);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: colorCustom,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );

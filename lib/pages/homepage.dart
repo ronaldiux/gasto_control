@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gasto_control/model/Colors.dart';
 import 'package:gasto_control/model/Gasto.dart';
 import 'package:gasto_control/pages/cadGasto.dart';
-// ignore: unused_import
 import 'package:gasto_control/utils/sqliteFunction.dart';
 import 'package:intl/intl.dart';
 
@@ -144,6 +144,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Controle de Gastos'),
+        backgroundColor: CustomColors.tema1(),
       ),
       drawer: Container(
         width: 200,
@@ -199,6 +200,13 @@ class _HomePageState extends State<HomePage> {
                   },
                   child: Text('Inserir Gastos - Aleatorio'),
                 ),
+                TextButton(
+                  onPressed: () async {
+                    await SqliteFunc().clearcategorias();
+                    await SqliteFunc().initCategorias();
+                  },
+                  child: Text('Resetar Categorias'),
+                ),
               ],
             ),
           ),
@@ -231,6 +239,7 @@ class _HomePageState extends State<HomePage> {
             await setmes(mestela);
           }
         },
+        backgroundColor: CustomColors.tema2(),
         child: Icon(Icons.add),
       ),
       body: Container(
@@ -240,18 +249,24 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    CircularProgressIndicator(),
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        CustomColors.tema1(),
+                      ),
+                    ),
                     SizedBox(
                       height: 10,
                     ),
                     Text(
-                      'Iniciando',
-                      style: TextStyle(fontSize: 18, color: Colors.black),
+                      'Carregando',
+                      style:
+                          TextStyle(fontSize: 18, color: CustomColors.tema1()),
                     )
                   ],
                 ),
               )
             : RefreshIndicator(
+                color: CustomColors.tema2(),
                 onRefresh: () async {
                   await setmes(mestela);
                 },
@@ -259,7 +274,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Container(
                       height: 60,
-                      color: Colors.blue,
+                      color: CustomColors.tema2(),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -310,8 +325,8 @@ class _HomePageState extends State<HomePage> {
                               int a = index % 2;
                               return Card(
                                 color: (a == 0)
-                                    ? Color.fromRGBO(203, 202, 203, 1)
-                                    : Color.fromRGBO(153, 152, 153, 1),
+                                    ? Color.fromRGBO(213, 212, 213, 1)
+                                    : Color.fromRGBO(183, 182, 183, 1),
                                 child: InkWell(
                                   onTap: () async {
                                     print('gasto id = ${gastos[index].id}');
@@ -372,26 +387,6 @@ class _HomePageState extends State<HomePage> {
                                             ],
                                           ),
                                         ),
-                                        Container(
-                                          width: 50,
-                                          //color: Colors.red,
-                                          child: Column(
-                                            children: [
-                                              IconButton(
-                                                onPressed: () async {},
-                                                icon: Icon(
-                                                  Icons.edit,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                              IconButton(
-                                                onPressed: () {},
-                                                icon: Icon(Icons.delete,
-                                                    size: 20),
-                                              ),
-                                            ],
-                                          ),
-                                        )
                                       ],
                                     ),
                                   ),
@@ -410,11 +405,30 @@ class _HomePageState extends State<HomePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                                'Entradas : R\$ ${entrada.toString().replaceAll('.', ',')}'),
+                              'Entradas : R\$ ${entrada.toString().replaceAll('.', ',')}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: CustomColors.tema2(),
+                              ),
+                            ),
                             Text(
-                                'Saidas     : R\$ ${saida.toString().replaceAll('.', ',')}'),
+                              'Saidas    : R\$ ${saida.toString().replaceAll('.', ',')}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: CustomColors.vermelho(),
+                              ),
+                            ),
                             Text(
-                                'Balanço   : R\$ ${balanco.toString().replaceAll('.', ',')}'),
+                              'Balanço  : R\$ ${balanco.toString().replaceAll('.', ',')}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: (balanco > 0)
+                                    ? CustomColors.tema1()
+                                    : (balanco == 0)
+                                        ? Colors.black
+                                        : CustomColors.vermelho(),
+                              ),
+                            ),
                           ],
                         ),
                       ),

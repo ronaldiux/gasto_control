@@ -32,7 +32,7 @@ class SqliteFunc {
     List<Categoria> categorias = [];
 
     List<Map<String, dynamic>> maps = [];
-    maps = await db.query('categorias');
+    maps = await db.query('categorias', orderBy: 'descricao');
     print('CATEGORIAS=${maps.length}');
     maps.forEach((element) {
       var def = new Categoria(
@@ -176,6 +176,7 @@ class SqliteFunc {
       var datefim = new DateTime(ano, mesfim, lastDay);
 
       print('where = $dateinit||$datefim');
+
       maps = await db.query('gasto',
           where: 'data BETWEEN ? AND ?',
           whereArgs: [
@@ -273,48 +274,66 @@ class SqliteFunc {
     );
   }
 
+  Future<String> delegasto(int id) async {
+    try {
+      final Database db = await getDatabase();
+      await db.delete('gasto', where: 'id = ?', whereArgs: [id]);
+      return 'ok';
+    } catch (e) {
+      return '$e';
+    }
+  }
+
+  Future clearcategorias() async {
+    final Database db = await getDatabase();
+    await db.delete('categorias');
+  }
+
   Future initCategorias() async {
     final Database db = await getDatabase();
     final List<Map<String, dynamic>> result = await db.query('categorias');
 
-    if (result.length == 0) {
-      List<String> categoriasstart = [];
+    List<String> categoriasstart = [];
 
-      categoriasstart.add('Prestação do imóvel/ aluguel,Despesas Fixas');
-      categoriasstart.add('Condomínio,Despesas Fixas');
-      categoriasstart
-          .add('Planos de saúde e de previdência privada,Despesas Fixas');
-      categoriasstart.add('Mensalidade escolar,Despesas Fixas');
-      categoriasstart.add('Prestação do carro,Despesas Fixas');
-      categoriasstart.add('Plano da Internet,Despesas Fixas');
-      categoriasstart.add('Assinatura de TV a cabo,Despesas Fixas');
-      categoriasstart.add('Assinatura de jornais e revistas,Despesas Fixas');
-      categoriasstart.add('Faxineira/empregada doméstica,Despesas Fixas');
-      categoriasstart.add('Cursos de idiomas,Despesas Fixas');
-      categoriasstart.add('Academia de ginástica,Despesas Fixas');
-      categoriasstart.add('Supermercado,Despesas Semifixas');
-      categoriasstart.add('Feira,Despesas Semifixas');
-      categoriasstart.add('Açougue,Despesas Semifixas');
-      categoriasstart.add('Energia elétrica,Despesas Semifixas');
-      categoriasstart.add('Gás,Despesas Semifixas');
-      categoriasstart.add('Telefone,Despesas Semifixas');
-      categoriasstart.add('Combustível,Despesas Semifixas');
-      categoriasstart.add('Roupas,Despesas Variáveis');
-      categoriasstart.add('Calçados,Despesas Variáveis');
-      categoriasstart.add('Bares e restaurantes,Despesas Variáveis');
-      categoriasstart.add('Teatro, cinema e shows,Despesas Variáveis');
-      categoriasstart.add('Farmácia,Despesas Variáveis');
-      categoriasstart.add('Viagen,Despesas Variáveis');
-      categoriasstart.add('Livraria,Despesas Variáveis');
-      categoriasstart.add('Presente,Despesas Variáveis');
-      categoriasstart.add('Locadora,Despesas Variáveis');
-      categoriasstart.add('Lavanderia,Despesas Variáveis');
-      categoriasstart.add('Salão de beleza,Despesas Variáveis');
-      categoriasstart.add('Gorjetas e esmolas,Despesas Variáveis');
-      categoriasstart.add(
-          'Juros do cheque especial e empréstimos pessoais,Despesas Variáveis');
-      categoriasstart.add('Tarifas bancárias,Despesas Variáveis');
+    categoriasstart.add('Prestação do imóvel/aluguel|Fixas');
+    categoriasstart.add('Condomínio|Despesas Fixas');
+    categoriasstart.add('Planos de saúde e de previdência privada|Fixas');
+    categoriasstart.add('Mensalidade escolar|Fixas');
+    categoriasstart.add('Prestação do carro|Fixas');
+    categoriasstart.add('Plano da Internet|Fixas');
+    categoriasstart.add('Assinatura de TV a cabo|Fixas');
+    categoriasstart.add('Assinatura de jornais e revistas|Fixas');
+    categoriasstart.add('Faxineira/empregada doméstica|Fixas');
+    categoriasstart.add('Cursos|Fixas');
+    categoriasstart.add('Academia de ginástica|Fixas');
+    categoriasstart.add('Supermercado|Semifixas');
+    categoriasstart.add('Feira|Semifixas');
+    categoriasstart.add('Açougue|Semifixas');
+    categoriasstart.add('Energia elétrica|Semifixas');
+    categoriasstart.add('Gás|Semifixas');
+    categoriasstart.add('Telefone|Semifixas');
+    categoriasstart.add('Combustível|Semifixas');
+    categoriasstart.add('Roupas|Variáveis');
+    categoriasstart.add('Calçados|Variáveis');
+    categoriasstart.add('Bares e restaurantes|Variáveis');
+    categoriasstart.add('Teatro, cinema e shows|Variáveis');
+    categoriasstart.add('Farmácia|Variáveis');
+    categoriasstart.add('Viagens|Variáveis');
+    categoriasstart.add('Livraria|Variáveis');
+    categoriasstart.add('Presente|Variáveis');
+    categoriasstart.add('Locadora|Variáveis');
+    categoriasstart.add('Lavanderia|Variáveis');
+    categoriasstart.add('Salão de beleza|Variáveis');
+    categoriasstart.add('Gorjetas e esmolas|Variáveis');
+    categoriasstart
+        .add('Juros do cheque especial e empréstimos pessoais|Variáveis');
+    categoriasstart.add('Tarifas bancárias|Variáveis');
+    categoriasstart.add('Salario/Adiantamento/13º|Fixas');
+    categoriasstart.add('Impostos (IPVU/IPVA/Etc..)|Fixas');
+    categoriasstart.add('Outros|Fixas');
+    categoriasstart.add('Manutenção de Veiculos|Fixas');
 
+    if (result.length != categoriasstart.length) {
       //String sql = await loadAssetInsertCategorias();
 
       var batch = db.batch();
@@ -322,7 +341,7 @@ class SqliteFunc {
       try {
         categoriasstart.forEach((element) {
           print('INSERINDO CATEGORIA= $element');
-          List<String> substr = element.split(',');
+          List<String> substr = element.split('|');
           batch.insert(
             'categorias',
             {'descricao': substr[0], 'tipo': substr[1], 'sistema': 'true'},
