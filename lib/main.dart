@@ -8,7 +8,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  MaterialColor colorCustom = MaterialColor(
+  final MaterialColor colorCustom = MaterialColor(
       int.parse(CustomColors.hexTema1, radix: 16), CustomColors().color);
 
   // This widget is the root of your application.

@@ -47,11 +47,6 @@ class CustomFormField extends StatelessWidget {
       this.autoFocus = false})
       : super(key: key);
 
-//
-//Icon(
-  //  Icons.mail,
-  //  color: Color.fromRGBO(100, 99, 102, 1),
-  //),
   @override
   Widget build(BuildContext context) {
     return Container(

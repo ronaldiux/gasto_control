@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gasto_control/model/Colors.dart';
+import 'package:gasto_control/model/DefaultWidgets.dart';
 import 'package:gasto_control/model/Gasto.dart';
 import 'package:gasto_control/pages/cadGasto.dart';
 import 'package:gasto_control/utils/sqliteFunction.dart';
@@ -13,6 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  GlobalKey columMenukey = GlobalKey();
   bool load = true;
   String mes = '';
   int mestela = 0;
@@ -143,7 +145,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Controle de Gastos'),
+        title: Defaultwidgets.dfText('Controle de Gastos',
+            defaultcolor: Colors.white,
+            tamanhofonte: 18,
+            align: TextAlign.center),
         backgroundColor: CustomColors.tema1(),
       ),
       drawer: Container(
@@ -151,61 +156,157 @@ class _HomePageState extends State<HomePage> {
         child: SafeArea(
           child: Drawer(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              key: columMenukey,
               children: [
-                TextButton(
-                  onPressed: () {},
-                  child: Text('Home Page'),
+                SizedBox(
+                  height: 50,
                 ),
-                TextButton(
-                  onPressed: () {
-                    SqliteFunc().limpagasto();
-                  },
-                  child: Text('Limpar Gastos'),
+                Container(
+                  color: Colors.grey[100],
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Defaultwidgets.dfText(
+                        'Home Page',
+                      ),
+                    ),
+                  ),
                 ),
-                TextButton(
-                  onPressed: () async {
-                    var res = await Navigator.push(
-                        context,
-                        new PageRouteBuilder(
-                          pageBuilder:
-                              (context, animation, secondaryAnimation) =>
-                                  CadGasto(),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            var begin = Offset(-2.0, 0.0);
-                            var end = Offset.zero;
-                            var curve = Curves.ease;
-
-                            var tween = Tween(begin: begin, end: end)
-                                .chain(CurveTween(curve: curve));
-
-                            return SlideTransition(
-                              position: animation.drive(tween),
-                              child: child,
-                            );
-                          },
-                        ));
-
-                    if ('$res' == 'ok') {
-                      await setmes(mestela);
-                    }
-
-                    //SqliteFunc().insRdmGasto();
-                  },
-                  child: Text('Inserir Gastos'),
+                SizedBox(
+                  height: 5,
                 ),
-                TextButton(
-                  onPressed: () {
-                    SqliteFunc().insRdmGasto();
-                  },
-                  child: Text('Inserir Gastos - Aleatorio'),
+                Container(
+                  color: Colors.grey[100],
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () async {
+                      var res = await Navigator.push(
+                          context,
+                          new PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    CadGasto(),
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              var begin = Offset(-2.0, 0.0);
+                              var end = Offset.zero;
+                              var curve = Curves.ease;
+
+                              var tween = Tween(begin: begin, end: end)
+                                  .chain(CurveTween(curve: curve));
+
+                              return SlideTransition(
+                                position: animation.drive(tween),
+                                child: child,
+                              );
+                            },
+                          ));
+
+                      if ('$res' == 'ok') {
+                        await setmes(mestela);
+                      }
+
+                      //SqliteFunc().insRdmGasto();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Defaultwidgets.dfText(
+                        'Parcelamentos',
+                      ),
+                    ),
+                  ),
                 ),
-                TextButton(
-                  onPressed: () async {
-                    await SqliteFunc().clearcategorias();
-                    await SqliteFunc().initCategorias();
-                  },
-                  child: Text('Resetar Categorias'),
+                SizedBox(
+                  height: 5,
+                ),
+                Container(
+                  color: Colors.grey[100],
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () async {
+                      var res = await Navigator.push(
+                          context,
+                          new PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    CadGasto(),
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              var begin = Offset(-2.0, 0.0);
+                              var end = Offset.zero;
+                              var curve = Curves.ease;
+
+                              var tween = Tween(begin: begin, end: end)
+                                  .chain(CurveTween(curve: curve));
+
+                              return SlideTransition(
+                                position: animation.drive(tween),
+                                child: child,
+                              );
+                            },
+                          ));
+
+                      if ('$res' == 'ok') {
+                        await setmes(mestela);
+                      }
+
+                      //SqliteFunc().insRdmGasto();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Defaultwidgets.dfText(
+                        'Inserir Gastos',
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                ExpansionTile(
+                  title: Defaultwidgets.dfText('Administrativo'),
+                  collapsedIconColor: CustomColors.tema1(),
+                  collapsedTextColor: CustomColors.tema1(),
+                  textColor: CustomColors.tema1(),
+                  iconColor: CustomColors.tema1(),
+                  childrenPadding: EdgeInsets.all(5),
+                  backgroundColor: Colors.grey[200],
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        SqliteFunc().insRdmGasto();
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        child:
+                            Defaultwidgets.dfText('Inserir Gastos Aleatorio'),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        SqliteFunc().limpagasto();
+                      },
+                      child: Container(
+                          width: double.infinity,
+                          child: Defaultwidgets.dfText('Limpar Gastos')),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        await SqliteFunc().clearcategorias();
+                        await SqliteFunc().initCategorias();
+                      },
+                      child: Container(
+                          width: double.infinity,
+                          child: Defaultwidgets.dfText('Resetar Categorias')),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 5,
                 ),
               ],
             ),
@@ -257,10 +358,9 @@ class _HomePageState extends State<HomePage> {
                     SizedBox(
                       height: 10,
                     ),
-                    Text(
+                    Defaultwidgets.dfText(
                       'Carregando',
-                      style:
-                          TextStyle(fontSize: 18, color: CustomColors.tema1()),
+                      tamanhofonte: 18,
                     )
                   ],
                 ),
@@ -293,10 +393,8 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           Container(
-                            child: Text(
-                              '$mes/2021',
-                              style: TextStyle(fontSize: 18),
-                            ),
+                            child: Defaultwidgets.dfText('$mes/2021',
+                                tamanhofonte: 18, defaultcolor: Colors.white),
                           ),
                           TextButton(
                             onPressed: () {
@@ -374,16 +472,23 @@ class _HomePageState extends State<HomePage> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.center,
                                             children: [
-                                              Text(gastos[index].descricao),
-                                              Text(
-                                                  '${DateFormat('dd/MM/yyyy').format(gastos[index].data)}'),
-                                              Text(
-                                                  gastos[index].formapagamento),
-                                              Text((gastos[index].tipo == 0)
-                                                  ? 'Entrada'
-                                                  : 'Saida'),
-                                              Text(
-                                                  'R\$ ${gastos[index].valor.toString().replaceAll('.', ',')}'),
+                                              Defaultwidgets.dfText(
+                                                  gastos[index].descricao,
+                                                  defaultcolor: Colors.black),
+                                              Defaultwidgets.dfText(
+                                                  '${DateFormat('dd/MM/yyyy').format(gastos[index].data)}',
+                                                  defaultcolor: Colors.black),
+                                              //Defaultwidgets.dfText(
+                                              //     gastos[index].formapagamento,
+                                              //    defaultcolor: Colors.black),
+                                              Defaultwidgets.dfText(
+                                                  (gastos[index].tipo == 0)
+                                                      ? 'Entrada'
+                                                      : 'Saida',
+                                                  defaultcolor: Colors.black),
+                                              Defaultwidgets.dfText(
+                                                  'R\$ ${gastos[index].valor.toString().replaceAll('.', ',')}',
+                                                  defaultcolor: Colors.black),
                                             ],
                                           ),
                                         ),
@@ -404,30 +509,21 @@ class _HomePageState extends State<HomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            Defaultwidgets.dfText(
                               'Entradas : R\$ ${entrada.toString().replaceAll('.', ',')}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: CustomColors.tema2(),
-                              ),
+                              defaultcolor: CustomColors.tema2(),
                             ),
-                            Text(
+                            Defaultwidgets.dfText(
                               'Saidas    : R\$ ${saida.toString().replaceAll('.', ',')}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: CustomColors.vermelho(),
-                              ),
+                              defaultcolor: CustomColors.vermelho(),
                             ),
-                            Text(
+                            Defaultwidgets.dfText(
                               'Balanço  : R\$ ${balanco.toString().replaceAll('.', ',')}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: (balanco > 0)
-                                    ? CustomColors.tema1()
-                                    : (balanco == 0)
-                                        ? Colors.black
-                                        : CustomColors.vermelho(),
-                              ),
+                              defaultcolor: (balanco > 0)
+                                  ? CustomColors.tema1()
+                                  : (balanco == 0)
+                                      ? Colors.black
+                                      : CustomColors.vermelho(),
                             ),
                           ],
                         ),
