@@ -3,14 +3,15 @@ class Parcelamento {
   String descricao;
   int qntparcelas;
   double valortotal;
-  String data;
+  DateTime data;
   bool pago;
 
-  Parcelamento(
-      {required this.id,
-      required this.descricao,
-      required this.qntparcelas,
-      required this.valortotal,
-      required this.data,
-      required this.pago});
+  Parcelamento({
+    required this.id,
+    required this.descricao,
+    required this.qntparcelas,
+    required this.valortotal,
+    required this.data,
+    required this.pago,
+  });
 }

@@ -1,10 +1,12 @@
-CREATE TABLE IF NOT EXISTS gasto (id INTEGER PRIMARY KEY ASC AUTOINCREMENT,descricao STRING (500),data DATE NOT NULL,
+CREATE TABLE IF NOT EXISTS gasto (
+    id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
+    descricao STRING (500),
+    data DATE NOT NULL,
     tipo            INTEGER      NOT NULL,
     valor           DOUBLE       NOT NULL,
-    formapagamento  STRING (200),
-    categoria       STRING (200),
+    formapagamento  STRING (200) NOT NULL,
     pago            BOOLEAN      NOT NULL,
-    id_parcelamento INTEGER 
+    id_parcelamento INTEGER  
 );
 |
 CREATE TABLE IF NOT EXISTS parcelamentos (
@@ -21,9 +23,5 @@ CREATE TABLE IF NOT EXISTS formaspagamento (
     descricao STRING (200) NOT NULL
 );
 |
-CREATE TABLE IF NOT EXISTS categorias (
-    id        INTEGER      PRIMARY KEY AUTOINCREMENT,
-    descricao STRING (200) ,
-    tipo      STRING (200)
-);
+
 |

@@ -6,7 +6,7 @@ class Defaultwidgets {
       {Color? defaultcolor,
       double tamanhofonte = 16,
       TextAlign align = TextAlign.left,
-      FontWeight fontweight = FontWeight.w500}) {
+      FontWeight fontweight = FontWeight.w400}) {
     Color textcolor =
         (defaultcolor == null) ? CustomColors.tema1() : defaultcolor;
 

@@ -11,6 +11,7 @@ class CustomFormField extends StatelessWidget {
   final String prefixtext;
   final bool obscuretxt;
   final Icon? icondecoration;
+  final int? maxLength;
   final Widget? widgetprefix;
   final TextInputAction? txtInputAction;
   final TextInputType? keyboardType;
@@ -44,7 +45,8 @@ class CustomFormField extends StatelessWidget {
       this.lblcolor = const Color.fromRGBO(120, 119, 122, 1),
       this.prefixtext = '',
       this.inputFormatters,
-      this.autoFocus = false})
+      this.autoFocus = false,
+      this.maxLength})
       : super(key: key);
 
   @override
@@ -57,6 +59,7 @@ class CustomFormField extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(left: 10),
         child: TextFormField(
+          maxLength: maxLength,
           autofocus: autoFocus,
           textCapitalization: TextCapitalization.sentences,
           enabled: enabled,

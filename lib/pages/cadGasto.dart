@@ -1,7 +1,7 @@
 import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
-import 'package:gasto_control/model/Categoria.dart';
 import 'package:gasto_control/model/Gasto.dart';
+import 'package:gasto_control/model/categoria_model.dart';
 import 'package:gasto_control/utils/sqliteFunction.dart';
 import 'package:gasto_control/widgets/textInput.dart';
 import 'package:intl/intl.dart';
@@ -25,21 +25,22 @@ class _CadGastoState extends State<CadGasto> {
   final FocusNode _descNode = FocusNode();
   final FocusNode _vlrNode = FocusNode();
 
-  bool loadad = false;
+  final FocusNode _tipo = FocusNode();
+  final FocusNode _formaPagamento = FocusNode();
+  final FocusNode _categoria = FocusNode();
+
   bool isLoading = true;
   String hintText = 'R\$';
-  String tipogasto = 'Entrada';
-  String categoriaGasto = '';
-  String formapagamento = 'A Vista';
+  String tipogasto = 'Saida(-)';
+  String categoriaName = 'Outras Despesas';
+  String formapagamento = 'Dinheiro';
   bool hasHint = false;
-  DateTime datagasto = DateTime.now();
   List<Categoria> categorias = [];
-  List<String> strCategorias = [];
+
+  DateTime datagasto = DateTime.now();
 
   @override
   void initState() {
-    super.initState();
-
     _vlrNode.addListener(() {
       if (_vlrNode.hasFocus) {
         setState(() {
@@ -61,6 +62,8 @@ class _CadGastoState extends State<CadGasto> {
     });
 
     init();
+
+    super.initState();
   }
 
   @override
@@ -77,29 +80,28 @@ class _CadGastoState extends State<CadGasto> {
 
     categorias = await SqliteFunc().getCategorias();
 
-    categorias.forEach((element) {
-      strCategorias.add(element.descricao);
-    });
-
-    print('CATEGORIAS=${categorias.length}');
-    //print(strCategorias);
-
     if (widget.idGasto != 0) {
       Gasto gst = await SqliteFunc().getgastoid(widget.idGasto);
 
-      categoriaGasto = gst.categoria;
+      if (gst.categoria.trim() == '') {
+        categoriaName = categorias[0].descricao;
+      } else {
+        categoriaName = gst.categoria;
+      }
+
       _descricao.text = gst.descricao;
       _valor.text = gst.valor.toString().replaceAll('.', ',');
       datagasto = gst.data;
+
       if (gst.tipo == 0) {
-        tipogasto = 'Entrada';
+        tipogasto = 'Entrada(+)';
       } else {
-        tipogasto = 'Saida';
+        tipogasto = 'Saida(-)';
       }
     } else {
+      categoriaName = categorias[0].descricao;
       _descricao.text = '';
       _valor.text = '0,00';
-      categoriaGasto = strCategorias[0];
     }
 
     setState(() {
@@ -122,30 +124,34 @@ class _CadGastoState extends State<CadGasto> {
       ),
       body: SingleChildScrollView(
         child: isLoading
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        CustomColors.tema1(),
+            ? Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height - 100,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          CustomColors.tema1(),
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      'Carregando',
-                      style:
-                          TextStyle(fontSize: 18, color: CustomColors.tema1()),
-                    )
-                  ],
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        'Carregando',
+                        style: TextStyle(
+                            fontSize: 18, color: CustomColors.tema1()),
+                      )
+                    ],
+                  ),
                 ),
               )
             : Container(
                 width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
+                //height: MediaQuery.of(context).size.height,
                 child: Stack(
                   children: [
                     Column(
@@ -153,7 +159,8 @@ class _CadGastoState extends State<CadGasto> {
                         Padding(
                           padding: EdgeInsets.all(5),
                           child: CustomFormField(
-                            autoFocus: true,
+                            maxLength: 100,
+                            //autoFocus: true,
                             ctrl: _descricao,
                             hinttxt: 'Descrição',
                             lblcolor: CustomColors.tema1(),
@@ -241,8 +248,15 @@ class _CadGastoState extends State<CadGasto> {
                             child: Padding(
                               padding: const EdgeInsets.only(left: 10),
                               child: DropdownButton<String>(
+                                onTap: () {
+                                  _tipo.requestFocus();
+                                },
+                                isExpanded: true,
+                                focusNode: _tipo,
                                 style: TextStyle(
-                                    color: CustomColors.tema1(), fontSize: 16),
+                                  color: CustomColors.tema1(),
+                                  fontSize: 16,
+                                ),
                                 dropdownColor: Colors.white,
                                 value: tipogasto,
                                 onChanged: (String? newValue) {
@@ -251,8 +265,52 @@ class _CadGastoState extends State<CadGasto> {
                                   });
                                 },
                                 items: <String>[
-                                  'Entrada',
-                                  'Saida'
+                                  'Entrada(+)',
+                                  'Saida(-)'
+                                ].map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                      value,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(5.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(3)),
+                            ),
+                            width: double.infinity,
+                            height: 50,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: DropdownButton<String>(
+                                onTap: () {
+                                  _formaPagamento.requestFocus();
+                                },
+                                isExpanded: true,
+                                focusNode: _formaPagamento,
+                                style: TextStyle(
+                                    color: CustomColors.tema1(), fontSize: 16),
+                                dropdownColor: Colors.white,
+                                value: formapagamento,
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    formapagamento = newValue!;
+                                  });
+                                },
+                                items: <String>[
+                                  'Crédito',
+                                  'Dinheiro',
+                                  'Débito',
+                                  'Parcelado'
                                 ].map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
@@ -275,62 +333,32 @@ class _CadGastoState extends State<CadGasto> {
                             height: 50,
                             child: Padding(
                               padding: const EdgeInsets.only(left: 10),
-                              child: DropdownButton<String>(
-                                style: TextStyle(
-                                    color: CustomColors.tema1(), fontSize: 16),
-                                dropdownColor: Colors.white,
-                                value: formapagamento,
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    formapagamento = newValue!;
-                                  });
-                                },
-                                items: <String>[
-                                  'A Vista',
-                                  'A Prazo',
-                                  'Parcelado'
-                                ].map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(5.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(3)),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 10),
                               child: DropdownButton(
+                                onTap: () {
+                                  _categoria.requestFocus();
+                                },
+                                focusNode: _categoria,
                                 isExpanded: true,
-                                value: categoriaGasto,
+                                value: categoriaName,
                                 style: TextStyle(
                                     color: CustomColors.tema1(), fontSize: 16),
                                 dropdownColor: Colors.white,
                                 onChanged: (newValue) {
                                   setState(() {
-                                    categoriaGasto = newValue.toString();
+                                    categoriaName = newValue.toString();
 
                                     if (_descricao.text == '') {
-                                      _descricao.text = categoriaGasto;
+                                      _descricao.text = categoriaName;
                                     }
                                   });
                                 },
-                                items: strCategorias.map((strCategorias) {
+                                items: categorias.map((strCategorias) {
                                   return DropdownMenuItem(
                                     child: Text(
-                                      strCategorias.trim(),
+                                      strCategorias.descricao.trim(),
                                       overflow: TextOverflow.visible,
                                     ),
-                                    value: strCategorias.trim(),
+                                    value: strCategorias.descricao.trim(),
                                   );
                                 }).toList(),
                               ),
@@ -356,39 +384,42 @@ class _CadGastoState extends State<CadGasto> {
                                 print(valor);
 
                                 setState(() {
-                                  loadad = true;
+                                  isLoading = true;
                                 });
 
                                 if (widget.idGasto == 0) {
                                   Gasto gst = Gasto(
-                                      id: 0,
-                                      descricao: _descricao.text,
-                                      data: datagasto,
-                                      tipo: (tipogasto == 'Entrada') ? 0 : 1,
-                                      valor: valor,
-                                      formapagamento: formapagamento,
-                                      categoria: categoriaGasto,
-                                      pago: false);
+                                    id: 0,
+                                    descricao: _descricao.text,
+                                    data: datagasto,
+                                    tipo: (tipogasto == 'Entrada(+)') ? 0 : 1,
+                                    valor: valor,
+                                    formapagamento: formapagamento,
+                                    pago: false,
+                                    categoria: categoriaName,
+                                  );
 
                                   res = await SqliteFunc().insGasto(gst);
                                 } else {
                                   Gasto gst = Gasto(
-                                      id: widget.idGasto,
-                                      descricao: _descricao.text,
-                                      data: datagasto,
-                                      tipo: (tipogasto == 'Entrada') ? 0 : 1,
-                                      valor: valor,
-                                      formapagamento: formapagamento,
-                                      categoria: categoriaGasto,
-                                      pago: false);
+                                    id: widget.idGasto,
+                                    descricao: _descricao.text,
+                                    data: datagasto,
+                                    tipo: (tipogasto == 'Entrada(+)') ? 0 : 1,
+                                    valor: valor,
+                                    formapagamento: formapagamento,
+                                    pago: false,
+                                    categoria: categoriaName,
+                                  );
 
                                   res = await SqliteFunc().updateGasto(gst);
                                 }
                                 await Future.delayed(
                                     Duration(milliseconds: 500));
                                 setState(() {
-                                  loadad = false;
+                                  isLoading = false;
                                 });
+
                                 if (res == 'ok') {
                                   Navigator.pop(context, 'ok');
                                 }
@@ -421,7 +452,7 @@ class _CadGastoState extends State<CadGasto> {
                                   child: TextButton(
                                     onPressed: () async {
                                       setState(() {
-                                        loadad = true;
+                                        isLoading = true;
                                       });
 
                                       var res = await SqliteFunc()
@@ -430,7 +461,7 @@ class _CadGastoState extends State<CadGasto> {
                                       await Future.delayed(
                                           Duration(milliseconds: 500));
                                       setState(() {
-                                        loadad = false;
+                                        isLoading = false;
                                       });
                                       if (res == 'ok') {
                                         Navigator.pop(context, 'ok');
@@ -454,27 +485,6 @@ class _CadGastoState extends State<CadGasto> {
                               )
                       ],
                     ),
-                    loadad
-                        ? Positioned(
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            top: 0, //MediaQuery.of(context).size.width / 2,
-                            left:
-                                0, //(MediaQuery.of(context).size.width / 2) - 40,
-                            child: Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                  color: Color.fromRGBO(37, 37, 38, .7),
-                                  borderRadius: BorderRadius.circular(0)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(15),
-                                child:
-                                    Center(child: CircularProgressIndicator()),
-                              ),
-                            ),
-                          )
-                        : SizedBox(),
                   ],
                 ),
               ),

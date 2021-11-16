@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gasto_control/model/Colors.dart';
 import 'package:gasto_control/model/DefaultWidgets.dart';
 import 'package:gasto_control/model/Gasto.dart';
@@ -294,15 +295,6 @@ class _HomePageState extends State<HomePage> {
                           width: double.infinity,
                           child: Defaultwidgets.dfText('Limpar Gastos')),
                     ),
-                    TextButton(
-                      onPressed: () async {
-                        await SqliteFunc().clearcategorias();
-                        await SqliteFunc().initCategorias();
-                      },
-                      child: Container(
-                          width: double.infinity,
-                          child: Defaultwidgets.dfText('Resetar Categorias')),
-                    ),
                   ],
                 ),
                 SizedBox(
@@ -412,19 +404,76 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      child: Card(
+                        elevation: 3,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Defaultwidgets.dfText(
+                                    'Entradas',
+                                    defaultcolor: Colors.grey,
+                                  ),
+                                  Defaultwidgets.dfText(
+                                    'Saídas',
+                                    defaultcolor: Colors.grey,
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Defaultwidgets.dfText(
+                                    '${entrada.toString().replaceAll('.', ',')}',
+                                    defaultcolor: CustomColors.tema2(),
+                                  ),
+                                  Defaultwidgets.dfText(
+                                    '${saida.toString().replaceAll('.', ',')}',
+                                    defaultcolor: CustomColors.vermelho(),
+                                  ),
+                                  Container(
+                                    width: 80,
+                                    height: 1,
+                                    color: Colors.grey,
+                                  ),
+                                  Defaultwidgets.dfText(
+                                    '${balanco.toString().replaceAll('.', ',')}',
+                                    defaultcolor: (balanco > 0)
+                                        ? CustomColors.tema1()
+                                        : (balanco == 0)
+                                            ? Colors.black
+                                            : CustomColors.vermelho(),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                     Expanded(
                       child: Container(
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                           child: ListView.builder(
-                            //scrollDirection: Axis.horizontal,
                             itemCount: gastos.length,
                             itemBuilder: (context, index) {
                               int a = index % 2;
                               return Card(
-                                color: (a == 0)
-                                    ? Color.fromRGBO(213, 212, 213, 1)
-                                    : Color.fromRGBO(183, 182, 183, 1),
+                                elevation: 3,
+                                color: Colors.white,
                                 child: InkWell(
                                   onTap: () async {
                                     print('gasto id = ${gastos[index].id}');
@@ -459,40 +508,86 @@ class _HomePageState extends State<HomePage> {
                                       await setmes(mestela);
                                     }
                                   },
-                                  //splashColor: Color.fromRGBO(63, 62, 63, 1),
                                   highlightColor:
                                       Color.fromRGBO(223, 223, 223, 1),
                                   child: Container(
-                                    height: 100,
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Defaultwidgets.dfText(
-                                                  gastos[index].descricao,
-                                                  defaultcolor: Colors.black),
-                                              Defaultwidgets.dfText(
-                                                  '${DateFormat('dd/MM/yyyy').format(gastos[index].data)}',
-                                                  defaultcolor: Colors.black),
-                                              //Defaultwidgets.dfText(
-                                              //     gastos[index].formapagamento,
-                                              //    defaultcolor: Colors.black),
-                                              Defaultwidgets.dfText(
-                                                  (gastos[index].tipo == 0)
-                                                      ? 'Entrada'
-                                                      : 'Saida',
-                                                  defaultcolor: Colors.black),
-                                              Defaultwidgets.dfText(
-                                                  'R\$ ${gastos[index].valor.toString().replaceAll('.', ',')}',
-                                                  defaultcolor: Colors.black),
-                                            ],
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            width: 5,
                                           ),
-                                        ),
-                                      ],
+                                          Container(
+                                            height: 40,
+                                            width: 40,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
+                                            ),
+                                            child: Center(
+                                              child: FaIcon(
+                                                FontAwesomeIcons.moneyBillAlt,
+                                                color: (gastos[index].tipo == 0)
+                                                    ? Colors.green.shade700
+                                                    : Colors.red.shade400,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Defaultwidgets.dfText(
+                                                  gastos[index].descricao,
+                                                  defaultcolor: Colors.black,
+                                                ),
+                                                Defaultwidgets.dfText(
+                                                  gastos[index].descricao,
+                                                  defaultcolor: Colors.grey,
+                                                  tamanhofonte: 12,
+                                                ),
+                                                Defaultwidgets.dfText(
+                                                  '${DateFormat('dd/MM/yyyy').format(gastos[index].data)}',
+                                                  defaultcolor: Colors.grey,
+                                                  tamanhofonte: 12,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: 60,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                Defaultwidgets.dfText(
+                                                  '${gastos[index].valor.toString().replaceAll('.', ',')}',
+                                                  defaultcolor:
+                                                      (gastos[index].tipo == 0)
+                                                          ? Colors
+                                                              .green.shade700
+                                                          : Colors.red.shade400,
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -502,33 +597,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    Container(
-                      height: 80,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Defaultwidgets.dfText(
-                              'Entradas : R\$ ${entrada.toString().replaceAll('.', ',')}',
-                              defaultcolor: CustomColors.tema2(),
-                            ),
-                            Defaultwidgets.dfText(
-                              'Saidas    : R\$ ${saida.toString().replaceAll('.', ',')}',
-                              defaultcolor: CustomColors.vermelho(),
-                            ),
-                            Defaultwidgets.dfText(
-                              'Balanço  : R\$ ${balanco.toString().replaceAll('.', ',')}',
-                              defaultcolor: (balanco > 0)
-                                  ? CustomColors.tema1()
-                                  : (balanco == 0)
-                                      ? Colors.black
-                                      : CustomColors.vermelho(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
                   ],
                 ),
               ),

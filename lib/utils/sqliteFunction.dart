@@ -1,20 +1,12 @@
 import 'dart:math';
-import 'package:gasto_control/model/Categoria.dart';
 import 'package:gasto_control/model/Gasto.dart';
+import 'package:gasto_control/model/Parcelamento.dart';
+import 'package:gasto_control/model/categoria_model.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
-import 'package:flutter/services.dart' show rootBundle;
 
 class SqliteFunc {
-  Future<String> loadAssetCreatetables() async {
-    return await rootBundle.loadString('assets/sqlite_start.txt');
-  }
-
-  Future<String> loadAssetInsertCategorias() async {
-    return await rootBundle.loadString('assets/insert_categorias_basic.txt');
-  }
-
   Future<String> limpagasto() async {
     final Database db = await getDatabase();
     db.delete('gasto');
@@ -25,25 +17,6 @@ class SqliteFunc {
   random(min, max) {
     var rn = new Random();
     return min + rn.nextInt(max - min);
-  }
-
-  Future<List<Categoria>> getCategorias() async {
-    final Database db = await getDatabase();
-    List<Categoria> categorias = [];
-
-    List<Map<String, dynamic>> maps = [];
-    maps = await db.query('categorias', orderBy: 'descricao');
-    print('CATEGORIAS=${maps.length}');
-    maps.forEach((element) {
-      var def = new Categoria(
-          id: element['id'],
-          descricao: element['descricao'],
-          tipo: element['tipo']);
-
-      categorias.add(def);
-    });
-
-    return categorias;
   }
 
   Future<String> insGasto(Gasto gst, {int idparcelamento = 0}) async {
@@ -58,14 +31,14 @@ class SqliteFunc {
         'tipo': gst.tipo,
         'valor': gst.valor,
         'formapagamento': gst.formapagamento,
+        'pago': (gst.pago) ? 1 : 0,
+        'id_parcelamento': idparcelamento,
         'categoria': gst.categoria,
-        'pago': gst.pago,
-        'id_parcelamento': idparcelamento
       });
       print('ok');
       return 'ok';
     } catch (e) {
-      print(e);
+      print('ERRO AO INSERIR=$e');
       return '$e';
     }
   }
@@ -84,9 +57,9 @@ class SqliteFunc {
             'tipo': gst.tipo,
             'valor': gst.valor,
             'formapagamento': gst.formapagamento,
-            'categoria': gst.categoria,
             'pago': gst.pago,
-            'id_parcelamento': idparcelamento
+            'id_parcelamento': idparcelamento,
+            'categoria': gst.categoria,
           },
           where: 'id = ?',
           whereArgs: [gst.id]);
@@ -112,9 +85,9 @@ class SqliteFunc {
         'tipo': (tipo == 0) ? 0 : 1,
         'valor': random(1, 100),
         'formapagamento': 'A Vista',
-        'categoria': '1',
-        'pago': 'false',
-        'id_parcelamento': 0
+        'pago': 0,
+        'id_parcelamento': 0,
+        'categoria': 'Entertenimento',
       });
       print('ok');
       return 'ok';
@@ -134,21 +107,44 @@ class SqliteFunc {
 
     maps.forEach((element) {
       bool pago = false;
-      if (element['pago'] == 'false') {
+      if (element['pago'] == '0') {
         pago = false;
       } else {
         pago = true;
       }
 
+      DateTime data = DateTime.now();
+      double valor = 0.0;
+      int tipo = 1;
+
+      try {
+        data = DateTime.parse(element['data']);
+      } catch (e) {
+        print('Erro na data $e');
+      }
+
+      try {
+        valor = element['valor'];
+      } catch (e) {
+        print('Erro no valor $e');
+      }
+
+      try {
+        tipo = element['tipo'];
+      } catch (e) {
+        print('Erro no tipo $e');
+      }
+
       gst = new Gasto(
-          categoria: '${element['categoria']}',
-          data: DateTime.parse(element['data']),
-          descricao: element['descricao'],
-          formapagamento: element['formapagamento'],
-          id: element['id'],
-          pago: pago,
-          tipo: element['tipo'],
-          valor: element['valor']);
+        id: element['id'],
+        data: data,
+        descricao: '${element['descricao']}',
+        formapagamento: '${element['formapagamento']}',
+        pago: pago,
+        tipo: tipo,
+        valor: valor,
+        categoria: '${element['categoria']}',
+      );
 
       print(gst.descricao);
     });
@@ -186,6 +182,39 @@ class SqliteFunc {
           orderBy: 'data,valor');
     }
 
+    print('FOREACH-ADDLISTA');
+    maps.forEach((element) {
+      bool pago = false;
+      if (element['pago'] == '0') {
+        pago = false;
+      } else {
+        pago = true;
+      }
+
+      var dr = new Gasto(
+        data: DateTime.parse(element['data']),
+        descricao: element['descricao'],
+        formapagamento: element['formapagamento'],
+        id: element['id'],
+        pago: pago,
+        tipo: element['tipo'],
+        valor: element['valor'],
+        categoria: element['categoria'],
+      );
+
+      gastos.add(dr);
+    });
+    return gastos;
+  }
+
+  Future<List<Parcelamento>> getParcelamentos() async {
+    final Database db = await getDatabase();
+
+    List<Parcelamento> parcelamentos = [];
+    List<Map<String, dynamic>> maps = [];
+
+    maps = await db.query('parcelamentos');
+
     maps.forEach((element) {
       bool pago = false;
       if (element['pago'] == 'false') {
@@ -193,32 +222,152 @@ class SqliteFunc {
       } else {
         pago = true;
       }
-      var dr = new Gasto(
-          categoria: '${element['categoria']}',
-          data: DateTime.parse(element['data']),
-          descricao: element['descricao'],
-          formapagamento: element['formapagamento'],
-          id: element['id'],
-          pago: pago,
-          tipo: element['tipo'],
-          valor: element['valor']);
 
-      gastos.add(dr);
+      var dr = new Parcelamento(
+        id: element['id'],
+        pago: pago,
+        data: DateTime.parse(element['data']),
+        descricao: element['descricao'],
+        qntparcelas: element['qntparcelas'],
+        valortotal: element['valortotal'],
+      );
+
+      parcelamentos.add(dr);
     });
-    return gastos;
+
+    return parcelamentos;
+  }
+
+  Future<int> getLastParcelamento() async {
+    int lastParce = 0;
+
+    final Database db = await getDatabase();
+
+    List<Map> list =
+        await db.rawQuery('SELECT max(id) as lastInsert FROM parcelamentos');
+
+    if (list.length == 1) {
+      String lasInsertid = list[0]['lastInsert'].toString();
+      lastParce = int.parse(lasInsertid);
+    }
+
+    return lastParce;
+  }
+
+  Future<List<Categoria>> getCategorias(
+      {String filtro = '', String campo = ''}) async {
+    final Database db = await getDatabase();
+    List<Categoria> categorias = [];
+
+    List<Map<String, dynamic>> maps = [];
+
+    if (filtro.isEmpty && campo.isEmpty) {
+      maps = await db.query('categorias', orderBy: 'descricao');
+    } else {
+      // filtro = columnId = ?
+      maps = await db.query(
+        'categorias',
+        orderBy: 'descricao',
+        where: filtro,
+        whereArgs: [campo],
+      );
+    }
+
+    print('CATEGORIAS=${maps.length}');
+    maps.forEach((element) {
+      var def = new Categoria(
+          id: element['id'],
+          descricao: element['descricao'],
+          tipo: element['tipo']);
+
+      categorias.add(def);
+    });
+
+    return categorias;
+  }
+
+  Future<String> insParcelamento(Parcelamento parcelamento) async {
+    final Database db = await getDatabase();
+
+    print('data=${DateFormat('yyyy-MM-dd').format(DateTime.now())}');
+
+    try {
+      db.insert('parcelamentos', {
+        'descricao': parcelamento.descricao,
+        'qntparcelas': parcelamento.qntparcelas,
+        'valortotal': parcelamento.valortotal,
+        'data': DateFormat('yyyy-MM-dd').format(parcelamento.data),
+        'pago': parcelamento.pago,
+      });
+      print('ok');
+      return 'ok';
+    } catch (e) {
+      print(e);
+      return '$e';
+    }
+  }
+
+  Future initCategorias() async {
+    final Database db = await getDatabase();
+
+    List<Map> list = await db.query('categorias');
+
+    if (list.length < 8) {
+      await db.insert(
+        'categorias',
+        {'descricao': 'Entertenimento', 'tipo': '-'},
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      await db.insert('categorias', {
+        'descricao': 'Saúde',
+        'tipo': '-',
+      });
+
+      await db.insert('categorias', {
+        'descricao': 'Transporte/Veiculo',
+        'tipo': '-',
+      });
+
+      await db.insert('categorias', {
+        'descricao': 'Bares/Restaurantes',
+        'tipo': '-',
+      });
+
+      await db.insert('categorias', {
+        'descricao': 'Moradia',
+        'tipo': '-',
+      });
+
+      await db.insert('categorias', {
+        'descricao': 'Remuneração',
+        'tipo': '+',
+      });
+
+      await db.insert('categorias', {
+        'descricao': 'Outras Despesas',
+        'tipo': '-',
+      });
+
+      await db.insert('categorias', {
+        'descricao': 'Outras Receitas',
+        'tipo': '+',
+      });
+    }
   }
 
   Future<Database> getDatabase() async {
     List<String> sqlrun = [];
+
     sqlrun.add("CREATE TABLE IF NOT EXISTS gasto (" +
         "  id INTEGER PRIMARY KEY ASC AUTOINCREMENT," +
         "  descricao STRING (500)," +
         "  data DATE NOT NULL," +
         "  tipo            INTEGER NOT NULL," +
         "  valor           DOUBLE NOT NULL," +
+        "  categoria       INTEGER NOT NULL," +
         "  formapagamento  STRING (200)," +
-        "  categoria       STRING (200)," +
-        "  pago            BOOLEAN NOT NULL," +
+        "  pago            INTEGER NOT NULL," +
         "  id_parcelamento INTEGER );");
 
     sqlrun.add("CREATE TABLE IF NOT EXISTS parcelamentos (" +
@@ -230,13 +379,13 @@ class SqliteFunc {
         " pago        BOOLEAN NOT NULL );");
 
     sqlrun.add("CREATE TABLE IF NOT EXISTS formaspagamento (" +
-        " id        INTEGER      PRIMARY KEY AUTOINCREMENT," +
+        " id        INTEGER  PRIMARY KEY AUTOINCREMENT," +
         " descricao STRING (200) NOT NULL);");
 
     sqlrun.add("CREATE TABLE IF NOT EXISTS categorias (" +
         "id        INTEGER      PRIMARY KEY AUTOINCREMENT," +
-        "descricao STRING (200) ," +
-        "tipo      STRING (200), sistema BOOLEAN NOT NULL);");
+        "descricao STRING (500)," +
+        "tipo STRING (1) );");
 
     String createtableappuser = '';
 
@@ -246,8 +395,8 @@ class SqliteFunc {
 
     return openDatabase(
       // join faz aa/ + /a = aa/a
-      p.join(await getDatabasesPath(), 'dbcontrolgastos.db'),
-      version: 6,
+      p.join(await getDatabasesPath(), 'control_gastosV1.db'),
+      version: 1,
       onOpen: (db) {
         print('OPEN DATABASE');
         try {
@@ -281,80 +430,6 @@ class SqliteFunc {
       return 'ok';
     } catch (e) {
       return '$e';
-    }
-  }
-
-  Future clearcategorias() async {
-    final Database db = await getDatabase();
-    await db.delete('categorias');
-  }
-
-  Future initCategorias() async {
-    final Database db = await getDatabase();
-    final List<Map<String, dynamic>> result = await db.query('categorias');
-
-    List<String> categoriasstart = [];
-
-    categoriasstart.add('Prestação do imóvel/aluguel|Fixas');
-    categoriasstart.add('Condomínio|Despesas Fixas');
-    categoriasstart.add('Planos de saúde e de previdência privada|Fixas');
-    categoriasstart.add('Mensalidade escolar|Fixas');
-    categoriasstart.add('Prestação do carro|Fixas');
-    categoriasstart.add('Plano da Internet|Fixas');
-    categoriasstart.add('Assinatura de TV a cabo|Fixas');
-    categoriasstart.add('Assinatura de jornais e revistas|Fixas');
-    categoriasstart.add('Faxineira/empregada doméstica|Fixas');
-    categoriasstart.add('Cursos|Fixas');
-    categoriasstart.add('Academia de ginástica|Fixas');
-    categoriasstart.add('Supermercado|Semifixas');
-    categoriasstart.add('Feira|Semifixas');
-    categoriasstart.add('Açougue|Semifixas');
-    categoriasstart.add('Energia elétrica|Semifixas');
-    categoriasstart.add('Gás|Semifixas');
-    categoriasstart.add('Telefone|Semifixas');
-    categoriasstart.add('Combustível|Semifixas');
-    categoriasstart.add('Roupas|Variáveis');
-    categoriasstart.add('Calçados|Variáveis');
-    categoriasstart.add('Bares e restaurantes|Variáveis');
-    categoriasstart.add('Teatro, cinema e shows|Variáveis');
-    categoriasstart.add('Farmácia|Variáveis');
-    categoriasstart.add('Viagens|Variáveis');
-    categoriasstart.add('Livraria|Variáveis');
-    categoriasstart.add('Presente|Variáveis');
-    categoriasstart.add('Locadora|Variáveis');
-    categoriasstart.add('Lavanderia|Variáveis');
-    categoriasstart.add('Salão de beleza|Variáveis');
-    categoriasstart.add('Gorjetas e esmolas|Variáveis');
-    categoriasstart
-        .add('Juros do cheque especial e empréstimos pessoais|Variáveis');
-    categoriasstart.add('Tarifas bancárias|Variáveis');
-    categoriasstart.add('Salario/Adiantamento/13º|Fixas');
-    categoriasstart.add('Impostos (IPVU/IPVA/Etc..)|Fixas');
-    categoriasstart.add('Outros|Fixas');
-    categoriasstart.add('Manutenção de Veiculos|Fixas');
-
-    if (result.length != categoriasstart.length) {
-      //String sql = await loadAssetInsertCategorias();
-
-      var batch = db.batch();
-
-      try {
-        categoriasstart.forEach((element) {
-          print('INSERINDO CATEGORIA= $element');
-          List<String> substr = element.split('|');
-          batch.insert(
-            'categorias',
-            {'descricao': substr[0], 'tipo': substr[1], 'sistema': 'true'},
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
-        });
-
-        await batch.commit(noResult: true);
-      } catch (e) {
-        print(e);
-      }
-    } else {
-      print('Categorias Iniciais já cadastradas (${result.length})');
     }
   }
 }
