@@ -7,6 +7,7 @@ class Gasto {
   double valor;
   String formapagamento;
   bool pago;
+  int idParcelamento;
 
   Gasto({
     required this.id,
@@ -17,5 +18,6 @@ class Gasto {
     required this.categoria,
     required this.formapagamento,
     required this.pago,
+    this.idParcelamento = 0,
   });
 }

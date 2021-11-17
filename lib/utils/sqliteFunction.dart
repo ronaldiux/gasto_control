@@ -14,6 +14,13 @@ class SqliteFunc {
     return '';
   }
 
+  Future<String> limpaParcelamentos() async {
+    final Database db = await getDatabase();
+    db.delete('parcelamentos');
+
+    return '';
+  }
+
   random(min, max) {
     var rn = new Random();
     return min + rn.nextInt(max - min);
@@ -57,7 +64,7 @@ class SqliteFunc {
             'tipo': gst.tipo,
             'valor': gst.valor,
             'formapagamento': gst.formapagamento,
-            'pago': gst.pago,
+            'pago': (gst.pago) ? 1 : 0,
             'id_parcelamento': idparcelamento,
             'categoria': gst.categoria,
           },
@@ -207,13 +214,13 @@ class SqliteFunc {
     return gastos;
   }
 
-  Future<List<Parcelamento>> getParcelamentos() async {
+  Future<Parcelamento> getParcelamentosPorId(int id) async {
     final Database db = await getDatabase();
 
     List<Parcelamento> parcelamentos = [];
     List<Map<String, dynamic>> maps = [];
 
-    maps = await db.query('parcelamentos');
+    maps = await db.query('parcelamentos', where: 'id = ?', whereArgs: [id]);
 
     maps.forEach((element) {
       bool pago = false;
@@ -230,6 +237,41 @@ class SqliteFunc {
         descricao: element['descricao'],
         qntparcelas: element['qntparcelas'],
         valortotal: element['valortotal'],
+        pulaDias: element['pulaDias'],
+        formapagamento: element['formapagamento'],
+      );
+
+      parcelamentos.add(dr);
+    });
+
+    return parcelamentos[0];
+  }
+
+  Future<List<Parcelamento>> getParcelamentos() async {
+    final Database db = await getDatabase();
+
+    List<Parcelamento> parcelamentos = [];
+    List<Map<String, dynamic>> maps = [];
+
+    maps = await db.query('parcelamentos');
+
+    maps.forEach((element) {
+      bool pago = false;
+      if (element['pago'] == '0') {
+        pago = false;
+      } else {
+        pago = true;
+      }
+
+      var dr = new Parcelamento(
+        id: element['id'],
+        pago: pago,
+        data: DateTime.parse(element['data']),
+        descricao: element['descricao'],
+        qntparcelas: element['qntparcelas'],
+        valortotal: element['valortotal'],
+        pulaDias: element['pulaDias'],
+        formapagamento: element['formapagamento'],
       );
 
       parcelamentos.add(dr);
@@ -239,16 +281,21 @@ class SqliteFunc {
   }
 
   Future<int> getLastParcelamento() async {
-    int lastParce = 0;
+    int lastParce = 1;
 
     final Database db = await getDatabase();
 
     List<Map> list =
         await db.rawQuery('SELECT max(id) as lastInsert FROM parcelamentos');
 
-    if (list.length == 1) {
-      String lasInsertid = list[0]['lastInsert'].toString();
-      lastParce = int.parse(lasInsertid);
+    try {
+      if (list[0]['lastInsert'].toString() != 'null') {
+        String lasInsertid = list[0]['lastInsert'].toString();
+        print('LAST-INSERT-ID--$lasInsertid');
+        lastParce = lasInsertid.isEmpty ? 1 : int.parse(lasInsertid);
+      }
+    } catch (e) {
+      print('Erro ao buscar last id parcelamento (${list.length}) $e');
     }
 
     return lastParce;
@@ -297,8 +344,11 @@ class SqliteFunc {
         'qntparcelas': parcelamento.qntparcelas,
         'valortotal': parcelamento.valortotal,
         'data': DateFormat('yyyy-MM-dd').format(parcelamento.data),
-        'pago': parcelamento.pago,
+        'pago': (parcelamento.pago) ? 1 : 0,
+        'pulaDias': parcelamento.pulaDias,
+        'formapagamento': parcelamento.formapagamento,
       });
+
       print('ok');
       return 'ok';
     } catch (e) {
@@ -376,7 +426,9 @@ class SqliteFunc {
         " qntparcelas INTEGER NOT NULL," +
         " valortotal  DOUBLE  NOT NULL," +
         " data        DATE    NOT NULL," +
-        " pago        BOOLEAN NOT NULL );");
+        " pago        INTEGER NOT NULL," +
+        " formapagamento  STRING (200) NOT NULL," +
+        " pulaDias    INTEGER NOT NULL);");
 
     sqlrun.add("CREATE TABLE IF NOT EXISTS formaspagamento (" +
         " id        INTEGER  PRIMARY KEY AUTOINCREMENT," +
@@ -395,8 +447,8 @@ class SqliteFunc {
 
     return openDatabase(
       // join faz aa/ + /a = aa/a
-      p.join(await getDatabasesPath(), 'control_gastosV1.db'),
-      version: 1,
+      p.join(await getDatabasesPath(), 'control_gastosV3.db'),
+      version: 3,
       onOpen: (db) {
         print('OPEN DATABASE');
         try {

@@ -18,8 +18,6 @@ class CadGasto extends StatefulWidget {
 
 class _CadGastoState extends State<CadGasto> {
   static final TextEditingController _descricao = new TextEditingController();
-  //var _valor =
-  //    new MoneyMaskedTextController(decimalSeparator: '.', leftSymbol: 'R\$ ');
   static final TextEditingController _valor = new TextEditingController();
 
   final FocusNode _descNode = FocusNode();
@@ -144,7 +142,7 @@ class _CadGastoState extends State<CadGasto> {
                         'Carregando',
                         style: TextStyle(
                             fontSize: 18, color: CustomColors.tema1()),
-                      )
+                      ),
                     ],
                   ),
                 ),

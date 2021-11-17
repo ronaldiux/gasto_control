@@ -3,7 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gasto_control/model/Colors.dart';
 import 'package:gasto_control/model/DefaultWidgets.dart';
 import 'package:gasto_control/model/Gasto.dart';
-import 'package:gasto_control/pages/cadGasto.dart';
+import 'package:gasto_control/pages/Cadastros/cadGasto.dart';
+import 'package:gasto_control/pages/parcelamento_lista.dart';
 import 'package:gasto_control/utils/sqliteFunction.dart';
 import 'package:intl/intl.dart';
 
@@ -185,12 +186,12 @@ class _HomePageState extends State<HomePage> {
                   width: double.infinity,
                   child: TextButton(
                     onPressed: () async {
-                      var res = await Navigator.push(
+                      await Navigator.push(
                           context,
                           new PageRouteBuilder(
                             pageBuilder:
                                 (context, animation, secondaryAnimation) =>
-                                    CadGasto(),
+                                    ParcelamentosLista(),
                             transitionsBuilder: (context, animation,
                                 secondaryAnimation, child) {
                               var begin = Offset(-2.0, 0.0);
@@ -207,9 +208,7 @@ class _HomePageState extends State<HomePage> {
                             },
                           ));
 
-                      if ('$res' == 'ok') {
-                        await setmes(mestela);
-                      }
+                      await setmes(mestela);
 
                       //SqliteFunc().insRdmGasto();
                     },
@@ -294,6 +293,14 @@ class _HomePageState extends State<HomePage> {
                       child: Container(
                           width: double.infinity,
                           child: Defaultwidgets.dfText('Limpar Gastos')),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        SqliteFunc().limpaParcelamentos();
+                      },
+                      child: Container(
+                          width: double.infinity,
+                          child: Defaultwidgets.dfText('Limpar Parcelamentos')),
                     ),
                   ],
                 ),
@@ -436,11 +443,11 @@ class _HomePageState extends State<HomePage> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Defaultwidgets.dfText(
-                                    '${entrada.toString().replaceAll('.', ',')}',
+                                    '${entrada.toStringAsFixed(2).replaceAll('.', ',')}',
                                     defaultcolor: CustomColors.tema2(),
                                   ),
                                   Defaultwidgets.dfText(
-                                    '${saida.toString().replaceAll('.', ',')}',
+                                    '${saida.toStringAsFixed(2).replaceAll('.', ',')}',
                                     defaultcolor: CustomColors.vermelho(),
                                   ),
                                   Container(
@@ -449,7 +456,7 @@ class _HomePageState extends State<HomePage> {
                                     color: Colors.grey,
                                   ),
                                   Defaultwidgets.dfText(
-                                    '${balanco.toString().replaceAll('.', ',')}',
+                                    '${balanco.toStringAsFixed(2).replaceAll('.', ',')}',
                                     defaultcolor: (balanco > 0)
                                         ? CustomColors.tema1()
                                         : (balanco == 0)
@@ -470,7 +477,7 @@ class _HomePageState extends State<HomePage> {
                           child: ListView.builder(
                             itemCount: gastos.length,
                             itemBuilder: (context, index) {
-                              int a = index % 2;
+                              //int a = index % 2;
                               return Card(
                                 elevation: 3,
                                 color: Colors.white,
@@ -552,7 +559,7 @@ class _HomePageState extends State<HomePage> {
                                                   defaultcolor: Colors.black,
                                                 ),
                                                 Defaultwidgets.dfText(
-                                                  gastos[index].descricao,
+                                                  gastos[index].categoria,
                                                   defaultcolor: Colors.grey,
                                                   tamanhofonte: 12,
                                                 ),
@@ -573,7 +580,7 @@ class _HomePageState extends State<HomePage> {
                                                   MainAxisAlignment.end,
                                               children: [
                                                 Defaultwidgets.dfText(
-                                                  '${gastos[index].valor.toString().replaceAll('.', ',')}',
+                                                  '${gastos[index].valor.toStringAsFixed(2).replaceAll('.', ',')}',
                                                   defaultcolor:
                                                       (gastos[index].tipo == 0)
                                                           ? Colors
