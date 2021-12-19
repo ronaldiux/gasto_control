@@ -18,8 +18,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   GlobalKey columMenukey = GlobalKey();
   bool load = true;
+
   String mes = '';
   int mestela = 0;
+
   List<Gasto> gastos = [];
   double balanco = 0.0;
   double entrada = 0.0;
